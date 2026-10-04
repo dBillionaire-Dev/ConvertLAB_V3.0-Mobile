@@ -1,4 +1,4 @@
-# ConvertLAB — Your Clinical Toolkit
+# ConvertLAB - Your Clinical Toolkit
 
 Medical calculators, clinical and laboratory tools, and unit conversions in one fast, **offline-first** app. It runs as an **Android app** (through Capacitor) and as a **responsive web app / PWA**, from a single Next.js codebase. Everything works without an account, and your data never leaves your device.
 
