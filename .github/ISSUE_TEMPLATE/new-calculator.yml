@@ -1,0 +1,87 @@
+name: "🧮 New calculator or conversion"
+description: Propose a calculator, converter or lab tool
+title: "Calculator: <name>"
+labels: ["enhancement", "new-calculator"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A source and a worked example are required. We cannot add a clinical tool without them. Please do not paste text or tables from copyrighted calculators, apps or guidelines. Describe the published formula in your own words and cite it.
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      placeholder: "e.g. Shock Index"
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Best category
+      options:
+        - General
+        - Renal
+        - Clinical Chemistry
+        - Hematology
+        - Microbiology
+        - Laboratory Solutions
+        - Spectrophotometry
+        - Drug Dosing
+        - Oncology
+        - Cardiovascular
+        - Stem Cell & Transplant
+        - Unit conversion
+        - Lab tool (other)
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What is it used for, and by whom?
+      description: Who would use it and in what situation?
+    validations:
+      required: true
+  - type: textarea
+    id: formula
+    attributes:
+      label: Formula or method
+      description: Write it out, with the units of each input and of the result
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source and version
+      description: Guideline, label, paper or official calculator, with year/version and a link
+    validations:
+      required: true
+  - type: textarea
+    id: population
+    attributes:
+      label: Population and limits
+      description: Age, weight range, renal function, setting, and anything where the tool should not be used
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Worked example from the source
+      description: Inputs with units, and the expected result, using the source's own numbers
+    validations:
+      required: true
+  - type: textarea
+    id: units
+    attributes:
+      label: Units and options
+      description: Which unit choices should the user get (for example kg / lb)?
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked that this tool is not already in the app (try Search)
+          required: true
+        - label: I am not copying text or tables from a copyrighted source
+          required: true
+        - label: I am willing to help test or review it

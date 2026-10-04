@@ -1,0 +1,90 @@
+name: "⚠️ Wrong result or reference (clinical safety)"
+description: A calculator, conversion, unit, threshold or reference looks wrong
+title: "SAFETY: <calculator name> - <short description>"
+labels: ["safety", "clinical"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Reports like this are the most valuable thing you can send.
+
+        **Do not include patient-identifying information** (names, record numbers, dates of birth). Use made-up or anonymised numbers.
+  - type: input
+    id: calculator
+    attributes:
+      label: Calculator or converter
+      description: The exact name as shown in the app
+      placeholder: "e.g. Creatinine Clearance (Cockcroft-Gault)"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Where did you see it?
+      options:
+        - Android app
+        - Web browser
+        - Both
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings → About
+      placeholder: "e.g. 3.0.0"
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Exact inputs and units you entered
+      description: Every field, with its unit and any dropdown choice
+      placeholder: |
+        Age: 65 years
+        Weight: 70 kg
+        Serum creatinine: 1.2 mg/dL
+        Sex: Male
+    validations:
+      required: true
+  - type: textarea
+    id: got
+    attributes:
+      label: Result the app gave
+      description: Copy the result, or paste a screenshot
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Result you expected, and why
+      description: Include your working if you have it
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source for the expected result
+      description: Guideline, product label, paper or official calculator, with its version/year and a link if possible
+      placeholder: "e.g. WHO guidelines for malaria, 2026 edition, section …"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: How serious could this be?
+      options:
+        - Could lead to harm if relied upon (wrong dose, wrong unit, missing warning)
+        - Misleading but unlikely to cause harm
+        - Cosmetic or wording only
+        - Not sure
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked the units and dropdown choices I entered
+          required: true
+        - label: This report contains no patient-identifying information
+          required: true

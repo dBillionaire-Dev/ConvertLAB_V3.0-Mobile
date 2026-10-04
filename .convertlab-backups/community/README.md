@@ -643,7 +643,7 @@ The tests prove that the code does what it was written to do. **They do not prov
 
 ## 7. Contributing
 
-Contributions are welcome: bug reports, clinical corrections, new calculators, translations, accessibility fixes and code. The short version of this section is in [CONTRIBUTING.md](CONTRIBUTING.md), and the security policy is in [SECURITY.md](SECURITY.md). Issues are filed with forms for **wrong results**, **new calculators**, **bugs** and **feature requests**.
+Contributions are welcome: bug reports, clinical corrections, new calculators, translations, accessibility fixes and code.
 
 ### 7.1 Workflow
 
@@ -686,7 +686,7 @@ Wrong numbers can hurt people, so clinical content is held to a higher bar than 
 
 ### 7.4 Reporting security or safety issues
 
-For a **patient-safety issue** (a wrong dose, a wrong unit, a missing warning), open an issue with *SAFETY* in the title and the details from [5.6](#56-reporting-a-wrong-result). For a **security or privacy** concern, do **not** open a public issue. Follow [SECURITY.md](SECURITY.md) and use GitHub's private vulnerability reporting.
+For a **patient-safety issue** (a wrong dose, a wrong unit, a missing warning), open an issue with *SAFETY* in the title and the details from [5.6](#56-reporting-a-wrong-result). For a **security or privacy** concern, contact the maintainer directly instead of opening a public issue.
 
 ### 7.5 Conduct
 
