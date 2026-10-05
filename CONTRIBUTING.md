@@ -18,7 +18,7 @@ The full technical guide is in the [README](README.md#6-developer-guide). This f
 ## Ground rules
 
 1. **Patient safety first.** If a change could make a result wrong or a warning weaker, it needs extra scrutiny and a source.
-2. **Local-first and private.** No analytics, tracking, accounts, backend calls or remote fonts and scripts. No patient-identifying data stored or logged.
+2. **Local-first and private.** No accounts, remote fonts or remote scripts, and no analytics, tracking or backend calls other than the documented anonymous usage statistics. No patient-identifying data stored or logged.
 3. **One product.** Use the shared components and design tokens. Do not give a single calculator its own one-off layout.
 4. **Logic stays out of the UI.** Calculation and conversion code lives in `lib/` as pure functions with tests.
 5. **Be respectful.** Assume good faith and keep feedback about the work. Contributors range from first-timers to practising clinicians.
@@ -82,7 +82,7 @@ The complete walkthrough, with a code example, is in the [README](README.md#67-a
 - [ ] `pnpm typecheck`, `pnpm test` and `pnpm build` pass
 - [ ] New or changed logic has tests, including a worked example from a source
 - [ ] UI uses the shared components and tokens, works in light and dark, and keeps 44 px touch targets
-- [ ] No new network calls, analytics or tracking
+- [ ] No new network calls, analytics or tracking beyond the documented anonymous usage statistics
 - [ ] No patient-identifying data stored or logged
 - [ ] Docs updated if behaviour changed
 - [ ] Clinical changes follow the policy above

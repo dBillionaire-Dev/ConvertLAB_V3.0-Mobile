@@ -1,6 +1,6 @@
 # ConvertLAB - Your Clinical Toolkit
 
-Medical calculators, clinical and laboratory tools, and unit conversions in one fast, **offline-first** app. It runs as an **Android app** (through Capacitor) and as a **responsive web app / PWA**, from a single Next.js codebase. Everything works without an account, and your data never leaves your device.
+Medical calculators, clinical and laboratory tools, and unit conversions in one fast, **offline-first** app. It runs as an **Android app** (through Capacitor) and as a **responsive web app / PWA**, from a single Next.js codebase. Everything works without an account, and your calculations, inputs and history never leave your device. The Android app can send an anonymous usage count, which you can switch off in Settings (see [4.12 Privacy](#412-privacy)).
 
 > **Version:** 3.0.0 &nbsp;·&nbsp; **Status:** active development, pre-release &nbsp;·&nbsp; **Package manager:** pnpm
 >
@@ -49,7 +49,7 @@ ConvertLAB started as a laboratory conversion and calculator tool. It has grown 
 **Design principles**
 
 1. **Mobile first.** The Android experience is the priority. Desktop gets a sidebar and wider layout, but it is the same app.
-2. **Local first.** No backend, no account, no analytics. History, favorites and settings are stored on the device.
+2. **Local first.** No account, and no data about your work leaves the device. History, favorites and settings are stored on the device. The only network traffic is an optional, anonymous usage count (see [6.13](#613-anonymous-usage-statistics)).
 3. **One product, not 155 forms.** Every tool shares the same header, input cards, result card, favorite, copy and share controls.
 4. **Logic is separate from UI.** Calculation and conversion code never depends on React, so it is easy to test and to extend.
 5. **Show your working.** Results come with the formula, assumptions, limitations and a source wherever they exist.
@@ -205,6 +205,7 @@ Tap **♡** on any calculator or converter, in a list or on its own page. Open *
 | **Haptic feedback** | A small vibration on results and favorites (Android app only) |
 | **Auto-save history** | Saves calculations and conversions automatically |
 | **Confirm before clearing history** | Asks before deleting all history |
+| **Share anonymous usage statistics** | Lets the Android app send an anonymous usage count (see [Privacy](#412-privacy)). Never your inputs or results. On by default, and you can turn it off |
 | **Offline mode** | Lets the **web** version work offline. It has no effect in the Android app, which is always offline |
 | **Export data** | Saves your history, favorites and settings as a JSON backup. On Android it opens the share sheet, so you can send it to Drive, email or notes |
 | **Import data** | Merges a ConvertLAB backup into this device (it never deletes what you already have) |
@@ -214,7 +215,7 @@ Tap **♡** on any calculator or converter, in a list or on its own page. Open *
 
 ### 4.12 Privacy
 
-- There is **no account, no server and no analytics or tracking code**. The app makes **no network requests** of its own.
+- There is **no account**. The Android app can send an **anonymous usage count**: a random installation ID, which tool was used, the app version and when. It **never** includes your inputs, results or history. Turn it off in **Settings → Share anonymous usage statistics**. Nothing else is sent.
 - Your history, favorites, recent searches and settings are stored **only on your device**.
 - Source links (for example to a WHO guideline) open in your browser, and that website is then a separate service with its own privacy practices.
 - Clearing the app's data (or uninstalling it) deletes everything it stored. Use **Export** first if you want a copy.
@@ -602,7 +603,7 @@ pnpm android:open       # press Run in Android Studio
 
 1. Set `versionName` and increase `versionCode` in `android/app/build.gradle`.
 2. In Android Studio: **Build → Generate Signed Bundle / APK → Android App Bundle**. Create a keystore once and **back it up outside the repository**. If it is lost, the app cannot be updated on Google Play. Keystore files are already git-ignored.
-3. Provide a **privacy policy** page (the privacy text in [4.12](#412-privacy) is a good starting point) and answer the Play **Data safety** form: the app collects no data.
+3. Provide a **privacy policy** page (the privacy text in [4.12](#412-privacy) is a good starting point) and answer the Play **Data safety** form to match the anonymous usage statistics in [6.13](#613-anonymous-usage-statistics). Do not answer "no data collected" while analytics are enabled.
 4. New Google Play developer accounts usually must run a **closed test** before publishing. Check Google's current requirements.
 5. **The application ID cannot be changed after the first upload.** Decide the final name and ID first.
 
@@ -639,6 +640,46 @@ The tests prove that the code does what it was written to do. **They do not prov
 
 `lib/calculators/service-worker-routes.test.ts` is a leftover from the earlier web-only version and is excluded in `vitest.config.ts`.
 
+### 6.13 Anonymous usage statistics
+
+The Android app can report **anonymous** usage to the ConvertLAB web backend (the deployed web app, which owns `/api/analytics` and `/api/analytics/presence` and stores data in Supabase). This is how the number of users and the most-used tools are counted. It is the **only** network traffic the app makes of its own.
+
+**What is sent**
+
+| Field | Example | Notes |
+|---|---|---|
+| `anonymousId` | a random UUID | Created on first use and kept on the device. Identifies an installation, never a person |
+| `calculatorId`, `calculatorName`, `category` | `bmi`, `BMI`, `general` | Which tool was used. Converters report as `conversion:<category>` |
+| `occurredAt` | ISO timestamp | When it was used |
+| `appVersion`, `source`, `environment` | `3.0.0`, `android`, `production` | `development` for dev builds |
+| `wasOffline` | `true` / `false` | Whether the device was offline when the tool was used |
+
+**Never sent:** inputs, results, history, favorites, searches, settings, names, contact details, location or hardware identifiers.
+
+**How it works** (`lib/analytics/`)
+
+- `track.ts` queues an event each time a calculator or converter is used. `outbox.ts` keeps the queue in local storage (500 events at most, oldest dropped), so nothing is lost while offline.
+- `sync.ts` sends the queue in batches of 100 and removes only the ids the server accepted.
+- `components/analytics-sync.tsx` sends a presence heartbeat every minute while the app is on screen, and flushes the queue when the app returns to the foreground or the device comes back online.
+- `http.ts` uses Capacitor's **native** HTTP client, so the backend needs **no CORS configuration** and normal page loading is not affected.
+- Analytics run **only** in the Android app, **only** when a backend URL was set at build time, and **only** if the user has not turned off **Settings → Share anonymous usage statistics**.
+
+**Configuration** (the app is a static export, so this is fixed at build time)
+
+```bash
+# .env.production  (git-ignored; see .env.example)
+NEXT_PUBLIC_ANALYTICS_URL=https://your-web-app.example
+```
+
+- `pnpm dev` does not read `.env.production`, so **analytics are off in development** and emulator testing never reaches your real numbers. To test the pipeline, set the variable for the dev run and `NEXT_PUBLIC_APP_ENV=development` so the rows are tagged and easy to delete.
+- Leave the variable unset to build a version with analytics completely disabled.
+
+**Backend requirements.** The backend must accept `source: "android"` (a one-line change in both routes, plus the TypeScript type, in the web repository). Until that is deployed, the app's events are rejected with HTTP 400 and stay queued. Deploy the backend change **first**.
+
+**Privacy and the Play Store.** Answer the Data safety form to match this behaviour: an **anonymous identifier** ("Device or other IDs") and **app activity** (which tools are used) are collected, they are **not shared with third parties**, they are sent **encrypted in transit (HTTPS)**, and the user can **opt out** in Settings. Update your privacy policy to say the same. This is engineering guidance, not legal advice. Check the data-protection rules that apply to your users.
+
+**Known limits.** Reinstalling the app or clearing its data creates a new ID, so counts slightly overstate users. The endpoint is public (like the web app's), so a determined person could send fake events. Add rate limiting on the server if that matters. Treat the numbers as indicative.
+
 ---
 
 ## 7. Contributing
@@ -658,7 +699,7 @@ Contributions are welcome: bug reports, clinical corrections, new calculators, t
 - [ ] Type-check, tests and build pass
 - [ ] New or changed logic has tests (including a worked example from a source)
 - [ ] UI changes use the shared components and tokens, work in light **and** dark, and have 44 px touch targets
-- [ ] No new network calls, analytics or tracking
+- [ ] No new network calls, analytics or tracking beyond the documented anonymous usage statistics
 - [ ] No patient-identifying data stored or logged
 - [ ] Docs updated if behaviour changed
 - [ ] Clinical changes follow [7.2](#72-clinical-change-policy)

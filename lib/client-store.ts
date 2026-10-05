@@ -34,7 +34,7 @@ export function addHistory(item: Omit<HistoryItem,"id"|"at">) {
 export function getHistory(): HistoryItem[] { return read<HistoryItem[]>(HIST_KEY, []) }
 export function clearHistory(){ localStorage.removeItem(HIST_KEY); window.dispatchEvent(new Event("convertlab:history")) }
 
-export type AppSettings = { theme:"system"|"light"|"dark"; fontSize:"small"|"medium"|"large"; offline:boolean; autoHistory:boolean }
-export const defaultSettings: AppSettings = { theme:"system",fontSize:"medium",offline:true,autoHistory:true }
+export type AppSettings = { theme:"system"|"light"|"dark"; fontSize:"small"|"medium"|"large"; offline:boolean; autoHistory:boolean; analytics:boolean }
+export const defaultSettings: AppSettings = { theme:"system",fontSize:"medium",offline:true,autoHistory:true,analytics:true }
 export function getSettings(): AppSettings { return {...defaultSettings,...read<Partial<AppSettings>>(SETTINGS_KEY,{})} }
 export function saveSettings(s:AppSettings){ localStorage.setItem(SETTINGS_KEY,JSON.stringify(s)); window.dispatchEvent(new Event("convertlab:settings")) }
