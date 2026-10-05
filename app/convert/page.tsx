@@ -5,13 +5,14 @@ import { Suspense, useEffect, useMemo, useState } from "react"
 import { conversionCategories } from "@/lib/conversions/registry"
 import { convert } from "@/lib/conversions/engine"
 import { addHistory, getSettings } from "@/lib/client-store"
+import { trackCalculation } from "@/lib/analytics/track"
 
 function Converter(){
  const params=useSearchParams(); const initial=params.get("category")
  const [categoryId,setCategoryId]=useState(initial&&conversionCategories.some(x=>x.id===initial)?initial:conversionCategories[0].id); const cat=useMemo(()=>conversionCategories.find(x=>x.id===categoryId)!,[categoryId]);
  const [from,setFrom]=useState(cat.units[0].id),[to,setTo]=useState(cat.units[1]?.id??cat.units[0].id),[value,setValue]=useState(""),[result,setResult]=useState<number|null>(null)
  useEffect(()=>{setFrom(cat.units[0].id);setTo(cat.units[1]?.id??cat.units[0].id);setResult(null)},[cat])
- function run(){const n=Number(value);if(!Number.isFinite(n))return;const r=convert(cat,n,from,to);setResult(r);const a=cat.units.find(x=>x.id===from)!,b=cat.units.find(x=>x.id===to)!;if(getSettings().autoHistory)addHistory({type:"conversion",name:`${a.symbol} to ${b.symbol}`,subtitle:cat.name,result:`${n} ${a.symbol} → ${Number(r.toPrecision(8))} ${b.symbol}`,href:`/convert?category=${cat.id}`})}
+ function run(){const n=Number(value);if(!Number.isFinite(n))return;const r=convert(cat,n,from,to);setResult(r);void trackCalculation({calculatorId:`conversion:${cat.id}`,calculatorName:`${cat.name} Conversion`,category:"conversions"});const a=cat.units.find(x=>x.id===from)!,b=cat.units.find(x=>x.id===to)!;if(getSettings().autoHistory)addHistory({type:"conversion",name:`${a.symbol} to ${b.symbol}`,subtitle:cat.name,result:`${n} ${a.symbol} → ${Number(r.toPrecision(8))} ${b.symbol}`,href:`/convert?category=${cat.id}`})}
  const fromU=cat.units.find(x=>x.id===from)!,toU=cat.units.find(x=>x.id===to)!
  return <div className="page"><div className="mb-4"><div className="text-xs font-bold text-slate-500">Units & laboratory quantities</div><h1 className="text-2xl font-black">Unit Converter</h1></div>
   <div className="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1">{conversionCategories.map(c=><button key={c.id} className={`pill ${c.id===cat.id?"active":""}`} onClick={()=>setCategoryId(c.id)}>{c.name}</button>)}</div>

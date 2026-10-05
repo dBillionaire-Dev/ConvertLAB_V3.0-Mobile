@@ -6,6 +6,9 @@ import { useEffect, useMemo, useState } from "react"
 import { calculators } from "@/lib/calculators/registry"
 import { conversionCategories } from "@/lib/conversions/registry"
 import { watchAppearance } from "@/lib/theme"
+import { isNative } from "@/lib/native"
+import { NativeBridge } from "@/components/native-bridge"
+import { AnalyticsSync } from "@/components/analytics-sync"
 
 const tabs=[{href:"/",label:"Home",Icon:House},{href:"/calculators",label:"Calculators",Icon:Calculator},{href:"/convert",label:"Convert",Icon:ArrowLeftRight},{href:"/history",label:"History",Icon:Clock3},{href:"/tools",label:"Tools",Icon:SlidersHorizontal}]
 
@@ -13,7 +16,9 @@ export function AppShell({children}:{children:React.ReactNode}){
  const path=usePathname(); const [search,setSearch]=useState(false); const [drawer,setDrawer]=useState(false); const [q,setQ]=useState("")
  useEffect(()=>{setSearch(false);setDrawer(false);setQ("")},[path])
  useEffect(()=>watchAppearance(),[])
- useEffect(()=>{if(!("serviceWorker" in navigator))return; if(process.env.NODE_ENV==="production"){navigator.serviceWorker.register("/sw.js").catch(()=>{})}else{navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if("caches" in window)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{})}},[])
+ // Tells the Android back button that the menu or search is open, and lets it close them.
+ useEffect(()=>{const root=document.documentElement; if(drawer||search)root.dataset.overlay="1"; else delete root.dataset.overlay; const close=()=>{setDrawer(false);setSearch(false)}; window.addEventListener("convertlab:close-overlay",close); return()=>window.removeEventListener("convertlab:close-overlay",close)},[drawer,search])
+ useEffect(()=>{if(!("serviceWorker" in navigator)||isNative())return; if(process.env.NODE_ENV==="production"){navigator.serviceWorker.register("/sw.js").catch(()=>{})}else{navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if("caches" in window)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{})}},[])
  const results=useMemo(()=>{
   const s=q.trim().toLowerCase(); if(!s)return []
   const c=calculators.filter(x=>[x.name,x.description,...(x.keywords??[])].join(" ").toLowerCase().includes(s)).slice(0,8).map(x=>({name:x.name,sub:x.description,href:`/calculators/${x.category}/${x.id}`}))
@@ -29,6 +34,8 @@ export function AppShell({children}:{children:React.ReactNode}){
    </div>
   </header>
   <main>{children}</main>
+  <NativeBridge/>
+  <AnalyticsSync/>
   <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur">
    <div className="mx-auto grid h-[72px] max-w-[900px] grid-cols-5 px-1">{tabs.map(({href,label,Icon})=>{const active=href==="/"?path===href:path.startsWith(href);return <Link key={href} href={href} className={`flex flex-col items-center justify-center gap-1 text-[10px] font-bold ${active?"text-blue-600":"text-slate-500"}`}><Icon size={20}/><span>{label}</span></Link>})}</div>
   </nav>
